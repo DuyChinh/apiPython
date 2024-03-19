@@ -19,15 +19,19 @@ def connect(config):
         print(error)
         
 message = ""
+@app.route("/") 
+def home():
+    return "API LOGIN"
 
-@app.route("/login", methods=['GET'])
+
+@app.get("/login")
 @cross_origin(origin='*')
 def get_info():
     return render_template("login.html")
 
-@app.route("/login", methods=['POST'])
-@cross_origin(origin='*')
 
+@app.post("/login")
+@cross_origin(origin='*')
 def get_name():
     username = request.form.get("username")
     password = request.form.get("password")
@@ -38,8 +42,6 @@ def get_name():
     conn.commit()
     conn.close()
     if not user:
-        # message="password or username is incorrect"
-        # return render_template("login.html", message=message)
         response = {
             "status": 404,
             "message": "password or username is incorrect"
@@ -59,7 +61,7 @@ def get_name():
     return response
 
 
-@app.route("/users", methods=['POST', 'GET'])
+@app.get("/users")
 @cross_origin(origin='*')
 def get_users():
     conn = connect(config)
@@ -68,7 +70,12 @@ def get_users():
     users = cur.fetchall()
     conn.commit()
     conn.close()
-    return (users)
+    response = {
+        "status": 200,
+        "message": "Success",
+        "data": users
+    }
+    return response
 
 if __name__ == '__main__':
     config = load_config()

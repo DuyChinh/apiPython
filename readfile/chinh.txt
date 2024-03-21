@@ -1,0 +1,5 @@
+hello I'm Chinh
+I learn in PTIT
+Write file with Python 2!
+Write file with Python 3!
+Write file with Python 4!

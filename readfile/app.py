@@ -69,20 +69,11 @@ def create_table():
         print("Fail")
     
 
-def table_exists(table_name, cursor):
-    cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = %s)", (table_name,))
-    return cursor.fetchone()[0]
-
 if __name__ == '__main__':
     config = load_config()
     conn = connect(config)
     cur = conn.cursor()
-    if not table_exists('orders', cur):
-        create_table()
-
-    cur.execute('SELECT * FROM orders')
-    orders = cur.fetchall()
-    print(orders)
+    create_table()
     # app.run(host='0.0.0.0', port='6868') 
     
 

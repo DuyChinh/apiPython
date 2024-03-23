@@ -1,4 +1,5 @@
 import psycopg2
+from urllib.parse import urlparse, parse_qs
 from config import load_config
 from flask import Flask, request, render_template
 from flask_cors import CORS, cross_origin
@@ -24,30 +25,65 @@ def home():
 
 @app.route("/orders")
 def order():
+    params = request.args.to_dict()
+    # print(params)
     conn = connect(config)
     cur = conn.cursor()
-    cur.execute("SELECT * FROM orders ORDER BY id ASC")
-    orders = cur.fetchall()
-    print(orders)
-    response = {
-        "status": 200,
-        "message": "Success",
-        "data": orders
-    }
-    return response
+    if len(params) == 0: 
+        cur.execute("SELECT * FROM orders ORDER BY id ASC")
+        orders = cur.fetchall()
+        response = {
+            "status": 200,
+            "message": "Success",
+            "data": orders
+        }
+        return response
+    sql = "SELECT * FROM orders "
+    sql += "WHERE "
+    # print(" AND ".join(params))
+    sql += " AND ".join(f"{key} = %s" for key in params.keys())
+    sql += " ORDER BY id ASC"
+    data = tuple(params.values())
+    try:
+        cur.execute(sql, data)
+        orders = cur.fetchall()
+        if len(orders) > 0: 
+            response = {
+                "count": len(orders),
+                "status": 200,
+                "message": "Success",
+                "data": orders
+            }
+        else:
+            response = {
+                "status": 404,
+                "message": "Not Found"
+            }
+        return response
+    except: 
+        response = {
+            "status": 500,
+            "message": "Server Error"
+        }
+        return response
 
-@app.route("/orders/<name>")
-def orderFilter(name):
-    conn = connect(config)
-    cur = conn.cursor()
-    cur.execute("SELECT {} FROM orders ORDER BY id ASC".format(name))
-    filter = cur.fetchall()
-    response = {
-        "status": 200,
-        "message": "Success",
-        "data": filter
-    }
-    return response
+# @app.post("/orders")
+# def orderFilter():
+#     params = request.args.to_dict()
+#     print(params)
+
+# @app.route("/orders/<name>")
+# def orderFilter(name):
+#     conn = connect(config)
+#     cur = conn.cursor()
+#     cur.execute("SELECT {} FROM orders ORDER BY id ASC".format(name))
+#     filter = cur.fetchall()
+#     response = {
+#         "status": 200,
+#         "message": "Success",
+#         "data": filter
+#     }
+#     return response
 
 def insert_orders_table(data):
     cur = conn.cursor()
@@ -82,7 +118,7 @@ if __name__ == '__main__':
     config = load_config()
     conn = connect(config)
     # cur = conn.cursor()
-    readfile()
+    # readfile()
     # create_table()
     app.run(host='0.0.0.0', port='6868') 
 

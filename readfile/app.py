@@ -1,8 +1,5 @@
-import psycopg2
-from config import load_config
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
-from connect_database import connect
 from routes import home, order
 from file import readfile
 app = Flask(__name__) #name contain current module
@@ -17,15 +14,8 @@ def main():
 def orders():
     return order()
 
-#readfile
-
-
 if __name__ == '__main__':
-    config = load_config()
-    conn = connect(config)
-    # cur = conn.cursor()
-    readfile()
-    # create_table()
+    # readfile()
     app.run(host='0.0.0.0', port='6868') 
 
 
